@@ -1,6 +1,5 @@
 import serial
 import time
-import numpy as np
 
 ser = serial.Serial('COM14', 9600)
 

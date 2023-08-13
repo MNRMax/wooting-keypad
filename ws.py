@@ -1,17 +1,33 @@
 from flask import Flask, render_template
-from flask_sock import Sock
+from flask_socketio import SocketIO, emit
+import serial
+import time
+
+ser = serial.Serial('COM14', 9600)
 
 app = Flask(__name__)
-sock = Sock(app)
+socketio = SocketIO(app, cors_allowed_origins=["http://localhost:5173"])
 
+@socketio.on('connect')
+def handle_connect():
+    print('Client connected')
+    emit('message', {'message': 'Connected to the server'})
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+@socketio.on('disconnect')
+def handle_disconnect():
+    print('Client disconnected')
 
+@socketio.on('message')
+def handle_message(data):
+    print('Received message:', data)
 
-@sock.route('/echo')
-def echo(sock):
-    while True:
-        data = sock.receive()
-        sock.send(data)
+@socketio.on('on')
+def handle_message():
+    ser.write(str.encode("l"))
+    
+@socketio.on('off')
+def handle_message():
+    ser.write(str.encode("o"))
+    
+if __name__ == '__main__':
+    app.run()
