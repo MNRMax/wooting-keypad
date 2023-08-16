@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, send_file
 from flask_socketio import SocketIO, emit
 import serial
 import serial.tools.list_ports
@@ -90,12 +90,15 @@ try:
 except:
     print("Device not connected")
 
-app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins=["http://localhost:5173"])
+app = Flask(__name__, static_url_path='/')
+socketio = SocketIO(app, cors_allowed_origins=["http://localhost:5173", "http://127.0.0.1:5000"])
 
 output = 0
 readSerial()
 
+@app.route('/')
+def home():
+    return send_file('./static/index.html')
 
 @socketio.on('connect')
 def handle_connect():
