@@ -6,6 +6,12 @@ import time
 import threading
 import asyncio
 
+color = "#00ffff"
+activationWooting = 0.4
+reactivationWooting = 0.2
+activationNormal = 2.3
+mode = "w"
+
 def getSerialPort():
     for port in serial.tools.list_ports.comports():
         if (" ".join(port.description.split(" ")[:-1]) == "Arduino Leonardo"):
@@ -58,7 +64,13 @@ readSerial()
 @socketio.on('connect')
 def handle_connect():
     print('Client connected')
-    emit('message', {'message': 'Connected to the server', 'data': output})
+    emit('data', {'data': {
+        "color" : color,
+        "activationWooting" : activationWooting,
+        "reactivationWooting" : reactivationWooting,
+        "activationNormal" : activationNormal,
+        "mode": mode
+    }})
     if (deviceConnected):
         emit("connected")
         
@@ -75,21 +87,9 @@ def handle_message(data):
     print(data.get("color"))
     ser.write(str.encode(data.get("color")))
     
-@socketio.on('off')
-def handle_message():
-    ser.write(str.encode("o"))
-    
-@socketio.on('ct')
-def handle_message():
-    ser.write(str.encode("ct"))
-    
-@socketio.on('cb')
-def handle_message():
-    ser.write(str.encode("cb"))
-    
-@socketio.on('d')
-def handle_message():
-    ser.write(str.encode("d"))
+@socketio.on('serial')
+def handle_message(data):
+    ser.write(str.encode(data.get("message")))
     
 if __name__ == '__main__':
     app.run()
